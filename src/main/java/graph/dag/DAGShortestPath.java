@@ -11,38 +11,66 @@ public class DAGShortestPath {
         Arrays.fill(dist, Integer.MAX_VALUE);
         dist[source] = 0;
 
-        List<Integer> topoOrder = TopologicalSort.topologicalSort(graph);
-        for (int u : topoOrder) {
-            if (dist[u] != Integer.MAX_VALUE) {
-                for (int v : graph.adj.get(u)) {
-                    int weight = graph.weights.get(u + ", "+v);
-                    if (dist[v] > dist[u] + weight) {
-                        dist[v] = dist[u] + weight;
+        try {
+            List<Integer> topoOrder = TopologicalSort.topologicalSort(graph);
+
+            for (int u : topoOrder) {
+                if (dist[u] != Integer.MAX_VALUE) {
+                    for (int v : graph.adj.get(u)) {
+                        int weight = graph.weights.get(u + "," + v);
+                        if (dist[u] + weight < dist[v]) {
+                            dist[v] = dist[u] + weight;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Warning: " + e.getMessage());
+            for (int u = 0; u < n; u++) {
+                if (dist[u] != Integer.MAX_VALUE) {
+                    for (int v : graph.adj.get(u)) {
+                        int weight = graph.weights.get(u + ", "+v);
+                        if (dist[u] + weight < dist[v]) {
+                            dist[v] = dist[u] + weight;
+                        }
                     }
                 }
             }
         }
         return dist;
     }
-    public static int[] longestPath(Graph graph, int source) {
-        Graph negatedGraph = negateWeights(graph);
-        int[] dist = shortestPath(negatedGraph, source);
 
-        for (int i = 0; i<dist.length; i++) {
-            if (dist[i] != Integer.MAX_VALUE) {
-                dist[i] = -dist[i];
+    public static int[] longestPath(Graph graph, int source) {
+        int n = graph.n;
+        int[] dist = new int[n];
+        Arrays.fill(dist, Integer.MIN_VALUE);
+        dist[source] = 0;
+
+        try {
+            List<Integer> topoOrder = TopologicalSort.topologicalSort(graph);
+            for (int u : topoOrder) {
+                if (dist[u] != Integer.MIN_VALUE) {
+                    for (int v : graph.adj.get(u)) {
+                        int weight = graph.weights.get(u + ", " + v);
+                        if (dist[u] + weight > dist[v]) {
+                            dist[v] = dist[u] + weight;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Warning: " + e.getMessage());
+            for (int u = 0; u < n; u++) {
+                if (dist[u] != Integer.MIN_VALUE) {
+                    for (int v : graph.adj.get(u)) {
+                        int weight = graph.weights.get(u + ", "+ v);
+                        if (dist[u] + weight > dist[v]) {
+                            dist[v] = dist[u] + weight;
+                        }
+                    }
+                }
             }
         }
         return dist;
-    }
-    private static Graph negateWeights(Graph graph) {
-        Graph negated = new Graph(graph.n);
-        for (int u = 0; u < graph.n; u++) {
-            for (int v : graph.adj.get(u)) {
-                int originalWeight = graph.weights.get(u +", " +v);
-                negated.addEdge(u, v, -originalWeight);
-            }
-        }
-        return negated;
     }
 }
